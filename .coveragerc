@@ -1,0 +1,3 @@
+[run]
+omit = 
+    src/my_mltools/__init__.py
