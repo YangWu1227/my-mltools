@@ -36,7 +36,7 @@ jobs:
     needs: ci
 
     # Only run this job if new work is pushed to "main" and the commit message contains either 'feat' or 'fix'
-    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') && (contains(github.event.head_commit.message, 'feat') || contains(github.event.head_commit.message, 'fix') || contains(github.event.head_commit.message, 'release'))
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/main') && (contains(github.event.head_commit.message, 'feat') || contains(github.event.head_commit.message, 'fix'))
 
     runs-on: ubuntu-latest
 
