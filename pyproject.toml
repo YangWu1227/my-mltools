@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "my_mltools"
-version = "0.3.0"
+version = "0.3.1"
 description = "My machine learning toolkit."
 authors = ["Yang Wu"]
 license = "MIT"
