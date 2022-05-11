@@ -18,12 +18,12 @@ from yellowbrick.cluster.elbow import distortion_score
 
 # --------------------------------- Plotting --------------------------------- #
 
-from matplotlib.pyplot import scatter
+import matplotlib.pyplot as plt
 from matplotlib.collections import PathCollection
 
 # ----------------------------- Standard library ----------------------------- #
 
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 
 # ---------------------------------------------------------------------------- #
@@ -34,7 +34,8 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
     """
     A custom transformer for handling coordinate data. This transformer creates a column of cluster labels
     using the `sklearn.cluster.KMeans` learning algorithm that may be used in training in lieu of the original 
-    coordinate data.
+    coordinate data. Since this transformer accepts only a pandas DataFrame, it can only be used in the `pipeline`
+    after an estimator whose `transform` or `fit_transform` returns a pandas DataFrame.
 
 
     Parameters
@@ -53,6 +54,8 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         its closest centroid. Logically, this is the metric that K-Means attempts to minimize as it is fitting the model.
     optimal_k_: int
         The the optimal number of clusters.
+    X_coords: ndarray of shape (n_samples, 2)
+        The original coordinate data.
     kmeans_: object
         An instance of `sklearn.cluster.KMeans` fitted with the optimal number of clusters as its `n_clusters` parameter.
     labels_: ndarray of shape (n_samples,)
@@ -111,7 +114,7 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         Returns
         -------
         pd.DataFrame
-            A pandas DataFrame containing a new column 'kmean_cluster_labels'.
+            A pandas DataFrame containing a new column 'coord_cluster_label'.
         """
         # Check that the fit method has been called
         check_is_fitted(self, ('distortion_scores_', 'optimal_k_'))
@@ -120,17 +123,20 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         X_coords = check_array(
             X[self.coord_cols], accept_sparse=False, dtype="numeric")
 
+        # Coordinate columns
+        self.X_coords = X_coords
+
         # Model
         self.kmeans_ = KMeans(n_clusters=self.optimal_k_, init='k-means++')
 
         # Store cluster labels as an attribute of the instance
         self.labels_ = self.kmeans_.fit_predict(X_coords)
 
-        X['kmean_cluster_labels'] = self.labels_
+        X['coord_cluster_label'] = self.labels_
 
         return X
 
-    def plot(self, X: pd.DataFrame) -> PathCollection:
+    def plot(self) -> PathCollection:
         """
         Generate a scatter plot of coordinate points with marker colors representing
         the cluster to which each data point belongs. This method should only be called
@@ -155,5 +161,23 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
             raise AttributeError(
                 "This 'CoordinateTransformer' instance is not transformed yet; please call 'transform' with appropriate arguments before plotting")
 
-        return scatter(x=X[self.coord_cols[0]], y=X[self.coord_cols[1]],
-                       c=self.labels_, s=50, cmap='viridis')
+        # Use numpy.take along columns of the ndarray
+        plt.scatter(
+            x=np.take(self.X_coords, indices=0, axis=1),
+            y=np.take(self.X_coords, indices=1, axis=1),
+            c=self.labels_, s=50, cmap='viridis'
+        )
+
+        plt.title('K-Means Clustered Map')
+        plt.xlabel('Longitude')
+        plt.ylabel("Latitude")
+
+        return plt
+
+    def _more_tags(self) -> Dict:
+        return {'_xfail_checks': {
+            'check_fit2d_1sample': 'Work with pandas DataFrame',
+            'check_fit2d_1feature': 'Work with pandas DataFrame',
+            'check_fit1d': 'Work with pandas DataFrame',
+            'check_fit2d_predict1d': 'Work with pandas DataFrame'
+        }}
