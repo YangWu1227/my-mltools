@@ -43,7 +43,7 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
     coord_cols : List[str], optional
         A list of columns containing coordinate data, by default ["longitude", "latitude"].
     strategy : str, optional
-        The trategy for creating clustering labels, by default "kmeans".
+        The strategy for creating clustering labels, by default "kmeans".
     k_range : range, optional
         The range of value for the `n_clusters` parameter in `sklearn.cluster.KMeans` to try in order to determine an optimal value, by default range(4, 13).
 
