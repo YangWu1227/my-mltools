@@ -173,11 +173,3 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         plt.ylabel("Latitude")
 
         return plt
-
-    def _more_tags(self) -> Dict:
-        return {'_xfail_checks': {
-            'check_fit2d_1sample': 'Work with pandas DataFrame',
-            'check_fit2d_1feature': 'Work with pandas DataFrame',
-            'check_fit1d': 'Work with pandas DataFrame',
-            'check_fit2d_predict1d': 'Work with pandas DataFrame'
-        }}
