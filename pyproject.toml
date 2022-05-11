@@ -7,11 +7,12 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<3.11"
 scikit-learn = "^1.0.2"
 pandas = "^1.4.2"
 kneed = "^0.7.0"
 yellowbrick = "^1.4"
+tensorflow = "^2.8.0"
 
 [tool.poetry.dev-dependencies]
 pytest-plt = "^1.1.0"
