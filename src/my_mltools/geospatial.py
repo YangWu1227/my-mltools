@@ -134,6 +134,8 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
 
         X['coord_cluster_label'] = self.labels_
 
+        X.drop(columns=self.coord_cols, inplace=True)
+
         return X
 
     def plot(self) -> PathCollection:
