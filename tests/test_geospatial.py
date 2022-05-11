@@ -5,7 +5,6 @@
 import pandas as pd
 import numpy as np
 import pytest
-from sklearn.compose import ColumnTransformer
 from sklearn.cluster import KMeans
 from sklearn.utils.estimator_checks import check_estimator
 from sklearn.exceptions import NotFittedError
@@ -88,9 +87,10 @@ class TestCoordinateTransformer:
         assert isinstance(transformer_instance.transform(
             test_data), pd.DataFrame)
         # Modifies in place
-        assert 'kmean_cluster_labels' in test_data.columns.tolist()
+        assert 'coord_cluster_label' in test_data.columns.tolist()
 
         # Check attributes after 'transform'
+        assert isinstance(transformer_instance.X_coords, np.ndarray)
         assert isinstance(transformer_instance.kmeans_, KMeans)
         assert isinstance(transformer_instance.labels_, np.ndarray)
         assert all([isinstance(label, np.int32)
@@ -100,8 +100,7 @@ class TestCoordinateTransformer:
         """
         Test generated scatter plot.
         """
-        transformer_instance.plot(
-            test_data).saveas = "geospatial/test_transformer_scatter.png"
+        transformer_instance.plot().saveas = "geospatial/test_transformer_scatter.png"
 
     def test_exceptions(self, invalid_data, test_data):
         """
@@ -124,4 +123,4 @@ class TestCoordinateTransformer:
 
         # Calling 'plot' before 'transform'
         with pytest.raises(AttributeError, match="This 'CoordinateTransformer' instance is not transformed yet; please call 'transform' with appropriate arguments before plotting"):
-            fresh_instance.plot(test_data)
+            fresh_instance.plot()
