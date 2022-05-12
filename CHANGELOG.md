@@ -2,6 +2,10 @@
 
 <!--next-version-placeholder-->
 
+## v0.5.0 (2022-05-12)
+### Feature
+* CoordinateTransformer now accepts and returns ndarray in addition to DataFrames ([`bc3670d`](https://github.com/YangWu1227/my_mltools/commit/bc3670da300f5a1d6abaa4c8568589998410f416))
+
 ## v0.4.0 (2022-05-12)
 ### Feature
 * Add find_missing, case_convert, relocate, and freq_tbls to cleaning_utils module ([`351582d`](https://github.com/YangWu1227/my_mltools/commit/351582d8ac57bfd72a7337aecacca449d93ece32))
