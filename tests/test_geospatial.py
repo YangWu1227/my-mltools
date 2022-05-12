@@ -5,6 +5,7 @@
 import pandas as pd
 import numpy as np
 import pytest
+from pytest_lazyfixture import lazy_fixture
 from sklearn.cluster import KMeans
 from sklearn.utils.estimator_checks import check_estimator
 from sklearn.exceptions import NotFittedError
@@ -22,6 +23,8 @@ from my_mltools.geospatial import CoordinateTransformer
 #                     Tests for CoordinateTransformer class                    #
 # ---------------------------------------------------------------------------- #
 
+# --------------------------------- Test data -------------------------------- #
+
 
 @pytest.fixture(scope='module')
 def test_data():
@@ -31,78 +34,104 @@ def test_data():
 
 
 @pytest.fixture(scope='module')
+def test_data_ndarray(test_data):
+    return test_data.to_numpy()
+
+
+@pytest.fixture(scope='module')
 def invalid_data():
     return {
         'missing': pd.DataFrame({'longitude': (1, 2, np.NaN), 'latitude': (3, 4, 5)}),
         'object': pd.DataFrame({'longitude': (1, 'missing', 'missing2'), 'latitude': (3, 4, 5)})
     }
 
+# ------------------------------ Test instances ------------------------------ #
+
 
 @pytest.fixture(scope='class')
-def transformer_instance():
+def transformer_instance_pd():
     return CoordinateTransformer()
 
 
+@pytest.fixture(scope='class')
+def transformer_instance_ndarray():
+    return CoordinateTransformer()
+
+# -------------- Parametrize fixures for multiple runs of tests -------------- #
+
+
+@pytest.mark.parametrize(
+    'data, instance, plot_paths',
+    [
+        # For dataframe input
+        (lazy_fixture('test_data'),
+         lazy_fixture('transformer_instance_pd'),
+         "geospatial/test_transformer_scatter_pd.png"),
+        # For ndarray input
+        (lazy_fixture('test_data_ndarray'),
+         lazy_fixture('transformer_instance_ndarray'),
+         "geospatial/test_transformer_scatter_ndarray.png")
+    ],
+    scope='module'
+)
 class TestCoordinateTransformer:
     """
     Tests for the CoordinateTransformer custom transformer class.
     """
 
-    def test_instantiate(self, transformer_instance):
+    def test_instantiate(self, data, instance, plot_paths):
         """
         Test that custom transformer has proper instantiation.
         """
-        assert isinstance(transformer_instance, CoordinateTransformer)
+        assert isinstance(instance, CoordinateTransformer)
 
-        assert transformer_instance.get_params() == {
-            'coord_cols': ['longitude', 'latitude'],
+        assert instance.get_params() == {
             'k_range': range(4, 13),
             'strategy': 'kmeans'
         }
 
-    def test_fit(self, transformer_instance, test_data):
+    def test_fit(self, data, instance, plot_paths):
         """
         Test that the transformer can be fitted to data.
         """
 
         # Fit returns 'self'
-        assert isinstance(transformer_instance.fit(
-            test_data), CoordinateTransformer)
+        assert isinstance(instance.fit(data),
+                          CoordinateTransformer)
 
         # Check learned attributes
-        assert hasattr(transformer_instance, 'optimal_k_')
-        assert isinstance(transformer_instance.optimal_k_, np.int64)
+        assert hasattr(instance, 'optimal_k_')
+        assert isinstance(instance.optimal_k_, np.int64)
 
-        assert hasattr(transformer_instance, 'distortion_scores_')
-        assert isinstance(transformer_instance.distortion_scores_, list)
+        assert hasattr(instance, 'distortion_scores_')
+        assert isinstance(instance.distortion_scores_, list)
+
         assert all([isinstance(score, float)
-                   for score in transformer_instance.distortion_scores_])
+                   for score in instance.distortion_scores_])
 
-    def test_transform(self, transformer_instance, test_data):
+    def test_transform(self, data, instance, plot_paths):
         """
         Test that the transformer transforms input data frame.
         """
 
-        # Transform returns transformed data containing new 'cluster_label' column
-        assert isinstance(transformer_instance.transform(
-            test_data), pd.DataFrame)
-        # Modifies in place
-        assert 'coord_cluster_label' in test_data.columns.tolist()
+        # Transform returns transformed 'cluster_label' ndarray
+        assert isinstance(instance.transform(
+            data), np.ndarray)
 
         # Check attributes after 'transform'
-        assert isinstance(transformer_instance.X_coords, np.ndarray)
-        assert isinstance(transformer_instance.kmeans_, KMeans)
-        assert isinstance(transformer_instance.labels_, np.ndarray)
+        assert isinstance(instance.X_coords, np.ndarray)
+        assert isinstance(instance.kmeans_, KMeans)
+        assert isinstance(instance.labels_, np.ndarray)
         assert all([isinstance(label, np.int32)
-                   for label in transformer_instance.labels_])
+                   for label in instance.labels_])
 
-    def test_plot(self, transformer_instance, test_data, plt):
+    def test_plot(self, data, instance, plot_paths, plt):
         """
         Test generated scatter plot.
         """
-        transformer_instance.plot().saveas = "geospatial/test_transformer_scatter.png"
+        instance.plot().saveas = plot_paths
 
-    def test_exceptions(self, invalid_data, test_data):
+    def test_exceptions(self, invalid_data, data, instance, plot_paths):
         """
         Test exceptions raised.
         """
@@ -119,7 +148,7 @@ class TestCoordinateTransformer:
 
         # Calling 'transform' before 'fit'
         with pytest.raises(NotFittedError, match="This CoordinateTransformer instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."):
-            fresh_instance.transform(test_data)
+            fresh_instance.transform(data)
 
         # Calling 'plot' before 'transform'
         with pytest.raises(AttributeError, match="This 'CoordinateTransformer' instance is not transformed yet; please call 'transform' with appropriate arguments before plotting"):
