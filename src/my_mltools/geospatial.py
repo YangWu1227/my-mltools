@@ -148,7 +148,7 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         Raises
         ------
         AttributeError
-            The 'labels_' field is created only after `transform` is called.
+            The 'labels_' field is created only after `transform` is called on the instance.
         """
         if not hasattr(self, 'labels_'):
             raise AttributeError(
