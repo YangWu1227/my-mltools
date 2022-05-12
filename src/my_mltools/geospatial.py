@@ -23,7 +23,7 @@ from matplotlib.collections import PathCollection
 
 # ----------------------------- Standard library ----------------------------- #
 
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 
 # ---------------------------------------------------------------------------- #
@@ -40,8 +40,6 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
 
     Parameters
     ----------
-    coord_cols : List[str], optional
-        A list of columns containing coordinate data, by default ["longitude", "latitude"].
     strategy : str, optional
         The strategy for creating clustering labels, by default "kmeans".
     k_range : range, optional
@@ -62,8 +60,7 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         The labels of each point.
     """
 
-    def __init__(self, coord_cols: List[str] = ["longitude", "latitude"], strategy: str = "kmeans", k_range: range = range(4, 13)) -> None:
-        self.coord_cols = coord_cols
+    def __init__(self, strategy: str = "kmeans", k_range: range = range(4, 13)) -> None:
         self.strategy = strategy
         self.k_range = k_range
 
@@ -73,8 +70,8 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
 
         Parameters
         ----------
-        X : pd.DataFrame
-            A pandas DataFrame.
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            The coordinate (longitude, latitude) columns.
         y : Optional[pd.Series], optional
             Ignored, present here for API consistency by convention, by default None.
 
@@ -84,10 +81,9 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
             A fitted estimator.
         """
         # Input validate, convert coordinate columns to ndarray
-        X_coords = check_array(
-            X[self.coord_cols], accept_sparse=False, dtype="numeric")
+        X_coords = check_array(X, accept_sparse=False, dtype="numeric")
 
-        # Multiple runs
+        # Multiple runs of k-means
         distortion_scores = []
         for k in self.k_range:
             model = KMeans(n_clusters=k)
@@ -102,26 +98,25 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
 
         return self
 
-    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
+    def transform(self, X: Union[pd.DataFrame, np.ndarray]) -> pd.DataFrame:
         """
-        Transform input DataFrame by creating a column of cluster labels.
+        Transform input coordinate columns into a single column of cluster labels.
 
         Parameters
         ----------
-        X : pd.DataFrame
-            A pandas DataFrame.
+        X : {array-like, sparse matrix}, shape (n_samples, n_features)
+            The coordinate (longitude, latitude) columns.
 
         Returns
         -------
-        pd.DataFrame
-            A pandas DataFrame containing a new column 'coord_cluster_label'.
+         X_transformed : array, shape (n_samples,)
+            The labels of each coordinate point.
         """
         # Check that the fit method has been called
         check_is_fitted(self, ('distortion_scores_', 'optimal_k_'))
 
         # Input validation
-        X_coords = check_array(
-            X[self.coord_cols], accept_sparse=False, dtype="numeric")
+        X_coords = check_array(X, accept_sparse=False, dtype="numeric")
 
         # Coordinate columns
         self.X_coords = X_coords
@@ -132,11 +127,7 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         # Store cluster labels as an attribute of the instance
         self.labels_ = self.kmeans_.fit_predict(X_coords)
 
-        X['coord_cluster_label'] = self.labels_
-
-        X.drop(columns=self.coord_cols, inplace=True)
-
-        return X
+        return self.labels_
 
     def plot(self) -> PathCollection:
         """
