@@ -23,7 +23,7 @@ from matplotlib.collections import PathCollection
 
 # ----------------------------- Standard library ----------------------------- #
 
-from typing import Optional, Union
+from typing import Union
 
 
 # ---------------------------------------------------------------------------- #
@@ -64,7 +64,7 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         self.strategy = strategy
         self.k_range = k_range
 
-    def fit(self, X: Union[pd.DataFrame, np.ndarray], y: Optional[pd.Series] = None):
+    def fit(self, X: Union[pd.DataFrame, np.ndarray], y=None):
         """
         Fit the transformer on X.
 
@@ -98,7 +98,7 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
 
         return self
 
-    def transform(self, X: Union[pd.DataFrame, np.ndarray]) -> pd.DataFrame:
+    def transform(self, X: Union[pd.DataFrame, np.ndarray]) -> np.ndarray:
         """
         Transform input coordinate columns into a single column of cluster labels.
 
