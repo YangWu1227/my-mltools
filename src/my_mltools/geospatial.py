@@ -109,7 +109,7 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
 
         Returns
         -------
-         X_transformed : array, shape (n_samples,)
+         X_transformed : array, shape (n_samples, 1)
             The labels of each coordinate point.
         """
         # Check that the fit method has been called
@@ -127,7 +127,8 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         # Store cluster labels as an attribute of the instance
         self.labels_ = self.kmeans_.fit_predict(X_coords)
 
-        return self.labels_
+        # For pipelining, reshape to a single (n_samples, 1) column array
+        return self.labels_.reshape(-1, 1)
 
     def plot(self) -> PathCollection:
         """
