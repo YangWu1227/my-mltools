@@ -23,7 +23,7 @@ from matplotlib.collections import PathCollection
 
 # ----------------------------- Standard library ----------------------------- #
 
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 
 # ---------------------------------------------------------------------------- #
@@ -64,7 +64,7 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         self.strategy = strategy
         self.k_range = k_range
 
-    def fit(self, X: pd.DataFrame, y: Optional[pd.Series] = None):
+    def fit(self, X: Union[pd.DataFrame, np.ndarray], y: Optional[pd.Series] = None):
         """
         Fit the transformer on X.
 
