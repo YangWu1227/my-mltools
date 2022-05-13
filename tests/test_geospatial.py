@@ -26,19 +26,19 @@ from my_mltools.geospatial import CoordinateTransformer
 # --------------------------------- Test data -------------------------------- #
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='class')
 def test_data():
     return pd.read_csv(
-        'tests/test_data.csv'
+        'tests/test_data/coordinates.csv'
     )
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='class')
 def test_data_ndarray(test_data):
     return test_data.to_numpy()
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope='class')
 def invalid_data():
     return {
         'missing': pd.DataFrame({'longitude': (1, 2, np.NaN), 'latitude': (3, 4, 5)}),
@@ -72,7 +72,7 @@ def transformer_instance_ndarray():
          lazy_fixture('transformer_instance_ndarray'),
          "geospatial/test_transformer_scatter_ndarray.png")
     ],
-    scope='module'
+    scope='class'
 )
 class TestCoordinateTransformer:
     """
