@@ -34,8 +34,8 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
     """
     A custom transformer for handling coordinate data. This transformer creates a column of cluster labels
     using the `sklearn.cluster.KMeans` learning algorithm that may be used in training in lieu of the original 
-    coordinate data. Since this transformer accepts only a pandas DataFrame, it can only be used in the `pipeline`
-    after an estimator whose `transform` or `fit_transform` returns a pandas DataFrame.
+    coordinate data. This transfomer accepts a two-dimensional array like object and returns a one-dimensional 
+    vector or column. 
 
 
     Parameters
