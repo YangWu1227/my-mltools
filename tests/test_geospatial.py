@@ -7,7 +7,6 @@ import numpy as np
 import pytest
 from pytest_lazyfixture import lazy_fixture
 from sklearn.cluster import KMeans
-from sklearn.utils.estimator_checks import check_estimator
 from sklearn.exceptions import NotFittedError
 
 # ----------------------------- Standard library ----------------------------- #
@@ -111,7 +110,7 @@ class TestCoordinateTransformer:
 
     def test_transform(self, data, instance, plot_paths):
         """
-        Test that the transformer transforms input data frame.
+        Test that the transformer transforms input data.
         """
 
         # Transform returns transformed 'cluster_label' ndarray
@@ -145,6 +144,13 @@ class TestCoordinateTransformer:
         # Coordinate data contain object dtype
         with pytest.raises(ValueError):
             fresh_instance.fit(invalid_data['object'])
+
+    def test_exceptions_branches(self, data, instance, plot_paths):
+        """
+        Test exceptions raised for both input data types.
+        """
+
+        fresh_instance = CoordinateTransformer()
 
         # Calling 'transform' before 'fit'
         with pytest.raises(NotFittedError, match="This CoordinateTransformer instance is not fitted yet. Call 'fit' with appropriate arguments before using this estimator."):
