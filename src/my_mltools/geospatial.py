@@ -72,7 +72,7 @@ class CoordinateTransformer(BaseEstimator, TransformerMixin):
         ----------
         X : {array-like, sparse matrix}, shape (n_samples, n_features)
             The coordinate (longitude, latitude) columns.
-        y : Optional[pd.Series], optional
+        y : optional
             Ignored, present here for API consistency by convention, by default None.
 
         Returns
