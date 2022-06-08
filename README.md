@@ -1,6 +1,6 @@
 # my_mltools
 
-[![codecov](https://codecov.io/gh/YangWu1227/my_mltools/branch/main/graph/badge.svg?token=9ZL267TMVD)](https://codecov.io/gh/YangWu1227/my_mltools)
+[![codecov](https://codecov.io/gh/YangWu1227/my-mltools/branch/main/graph/badge.svg?token=9ZL267TMVD)](https://codecov.io/gh/YangWu1227/my-mltools)
 
 My machine learning toolkit.
 
